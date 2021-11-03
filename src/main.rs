@@ -62,6 +62,16 @@ fn view(model: &Model) -> Node<Msg> {
         C!["counter"],
         "This is a counter: ",
         button![model.counter, ev(Ev::Click, |_| Msg::Increment),],
+        canvas![
+            el_ref(&model.canvas),
+            attrs![
+                At::Width => px(400),
+                At::Height => px(200),
+            ],
+            style![
+                St::Border => "1px solid black",
+            ],
+        ],
     ]
 }
 
