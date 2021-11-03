@@ -31,13 +31,16 @@ fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
             model.counter += 1;
         }
         Msg::Rendered => {
-            draw(&model.canvas);
+            draw(&model.canvas, model.counter);
             orders.after_next_render(|_| Msg::Rendered).skip();
         }
     }
 }
 
-fn draw(canvas: &ElRef<HtmlCanvasElement>) {
+fn draw(canvas: &ElRef<HtmlCanvasElement>, counter: i32) {
+    let colors = vec!["red", "blue", "green", "yellow"];
+    let idx = (counter as usize) % colors.len();
+    let c = colors[idx];
     let canvas = canvas.get().expect("get canvas element");
     let ctx = seed::canvas_context_2d(&canvas);
 
@@ -49,7 +52,7 @@ fn draw(canvas: &ElRef<HtmlCanvasElement>) {
     let height = 100.;
 
     ctx.rect(0., 0., width, height);
-    ctx.set_fill_style(&JsValue::from_str("blue"));
+    ctx.set_fill_style(&JsValue::from_str(c));
     ctx.fill();
 
     ctx.move_to(0., 0.);
