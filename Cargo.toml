@@ -2,7 +2,7 @@
 name = "seed-playground"
 version = "0.1.0"
 authors = ["pierrick.bouvier@posteo.net"]
-edition = "2021"
+edition = "2018"
 
 [dependencies]
 seed = "0.8.0"
