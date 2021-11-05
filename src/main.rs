@@ -8,6 +8,7 @@ fn init(_: Url, orders: &mut impl Orders<Msg>) -> Model {
 
 struct Model {
     counter: i32,
+    render: i32,
     canvas: ElRef<HtmlCanvasElement>,
 }
 
@@ -15,6 +16,7 @@ impl Default for Model {
     fn default() -> Self {
         Self {
             counter: 0,
+            render: 0,
             canvas: ElRef::<HtmlCanvasElement>::default(),
         }
     }
@@ -31,6 +33,8 @@ fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
             model.counter += 1;
         }
         Msg::Rendered => {
+            model.render += 1;
+            draw(&model.canvas, model.counter);
             orders.after_next_render(|_| Msg::Rendered).skip();
         }
     }
@@ -60,9 +64,10 @@ fn draw(canvas: &ElRef<HtmlCanvasElement>, counter: i32) {
 }
 
 fn view(model: &Model) -> Node<Msg> {
-    draw(&model.canvas, model.counter);
     div![
         C!["counter"],
+        C!["render"],
+        button![model.render],
         "This is a counter: ",
         button![model.counter, ev(Ev::Click, |_| Msg::Increment),],
         canvas![
