@@ -31,7 +31,6 @@ fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
             model.counter += 1;
         }
         Msg::Rendered => {
-            draw(&model.canvas, model.counter);
             orders.after_next_render(|_| Msg::Rendered).skip();
         }
     }
@@ -61,6 +60,7 @@ fn draw(canvas: &ElRef<HtmlCanvasElement>, counter: i32) {
 }
 
 fn view(model: &Model) -> Node<Msg> {
+    draw(&model.canvas, model.counter);
     div![
         C!["counter"],
         "This is a counter: ",
