@@ -5,7 +5,7 @@ fn init(_: Url, orders: &mut impl Orders<Msg>) -> Model {
     orders.after_next_render(Msg::Rendered);
     orders.send_msg(Msg::AddCanvas);
     Model {
-        input: 50.,
+        input: 100.,
         ..Default::default()
     }
 }
@@ -84,15 +84,22 @@ fn draw(canvas: &ElRef<HtmlCanvasElement>, id: i32) {
 fn view(model: &Model) -> Node<Msg> {
     div![
         p!["This was rendered ", model.render, " times"],
-        p!["last render timestamp (ms): ", model.last_render_timestamp as u64],
+        p![
+            "last render timestamp (ms): ",
+            model.last_render_timestamp as u64
+        ],
         p!["Numer of canvas: ", model.all_canvas.len()],
         button!["add 10 canvas", ev(Ev::Click, |_| Msg::AddCanvas)],
         div![
-            "delay between updates",
+            "delay between updates ",
             input![
-                attrs![At::Type => "Number", At::Value => model.input, At::Step => 10],
+                attrs![At::Type => "range", At::Min => 1, At::Max => 500, At::Value => model.input],
                 input_ev(Ev::Input, Msg::InputTextChanged),
             ],
+            "(",
+            model.input,
+            "ms",
+            ")"
         ],
         model.all_canvas.iter().map(|c| one_canvas(c))
     ]
