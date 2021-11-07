@@ -101,6 +101,9 @@ fn view(model: &Model) -> Node<Msg> {
             "ms",
             ")"
         ],
+        hr!(),
+        div!["TODO: try using putImageData (see how faster it is, + use dedicated rust lib!)"],
+        hr!(),
         model.all_canvas.iter().map(|c| one_canvas(c))
     ]
 }
