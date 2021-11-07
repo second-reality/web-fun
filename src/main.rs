@@ -40,7 +40,11 @@ fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
             orders.after_next_render(Msg::Rendered);
         }
         Msg::InputTextChanged(val) => {
-            model.input = val.parse().unwrap_or(1000.);
+            if let Ok(v) = val.parse() {
+                if v > 0. {
+                    model.input = v;
+                }
+            }
         }
     }
 }
@@ -78,7 +82,6 @@ fn view(model: &Model) -> Node<Msg> {
                 attrs![At::Type => "Number", At::Value => model.input],
                 input_ev(Ev::Input, Msg::InputTextChanged),
             ],
-
         ],
         div![
             "This is a counter: ",
