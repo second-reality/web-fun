@@ -4,7 +4,7 @@ use web_sys::HtmlCanvasElement;
 fn init(_: Url, orders: &mut impl Orders<Msg>) -> Model {
     orders.after_next_render(Msg::Rendered);
     let mut model = Model::default();
-    model.input = 1000.;
+    model.input = 500.;
     model
 }
 
@@ -13,7 +13,6 @@ const HEIGHT: i32 = 50;
 
 #[derive(Default)]
 struct Model {
-    counter: i32,
     render: i32,
     input: f64,
     last_render_timestamp: f64,
@@ -21,16 +20,12 @@ struct Model {
 }
 
 enum Msg {
-    Increment,
     Rendered(RenderInfo),
     InputTextChanged(String),
 }
 
 fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
     match msg {
-        Msg::Increment => {
-            model.counter += 1;
-        }
         Msg::Rendered(info) => {
             if info.timestamp - model.last_render_timestamp > model.input {
                 model.render += 1;
@@ -49,9 +44,9 @@ fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
     }
 }
 
-fn draw(canvas: &ElRef<HtmlCanvasElement>, counter: i32) {
+fn draw(canvas: &ElRef<HtmlCanvasElement>, id: i32) {
     let colors = vec!["red", "blue", "green", "yellow"];
-    let idx = (counter as usize) % colors.len();
+    let idx = (id as usize) % colors.len();
     let c = colors[idx];
     let canvas = canvas.get().expect("get canvas element");
     let ctx = seed::canvas_context_2d(&canvas);
@@ -79,13 +74,9 @@ fn view(model: &Model) -> Node<Msg> {
         div![
             "delay between updates",
             input![
-                attrs![At::Type => "Number", At::Value => model.input],
+                attrs![At::Type => "Number", At::Value => model.input, At::Step => 10],
                 input_ev(Ev::Input, Msg::InputTextChanged),
             ],
-        ],
-        div![
-            "This is a counter: ",
-            button![model.counter, ev(Ev::Click, |_| Msg::Increment),],
         ],
         div![canvas![
             el_ref(&model.canvas),
