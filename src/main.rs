@@ -2,29 +2,27 @@ use seed::{prelude::*, *};
 use web_sys::HtmlCanvasElement;
 
 fn init(_: Url, orders: &mut impl Orders<Msg>) -> Model {
-    orders.after_next_render(|_| Msg::Rendered);
-    Model::default()
+    orders.after_next_render(Msg::Rendered);
+    let mut model = Model::default();
+    model.input = 1000.;
+    model
 }
 
+const WIDTH: i32 = 50;
+const HEIGHT: i32 = 50;
+
+#[derive(Default)]
 struct Model {
     counter: i32,
     render: i32,
+    input: f64,
+    last_render_timestamp: f64,
     canvas: ElRef<HtmlCanvasElement>,
-}
-
-impl Default for Model {
-    fn default() -> Self {
-        Self {
-            counter: 0,
-            render: 0,
-            canvas: ElRef::<HtmlCanvasElement>::default(),
-        }
-    }
 }
 
 enum Msg {
     Increment,
-    Rendered,
+    Rendered(RenderInfo),
 }
 
 fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
@@ -32,10 +30,13 @@ fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
         Msg::Increment => {
             model.counter += 1;
         }
-        Msg::Rendered => {
-            model.render += 1;
-            draw(&model.canvas, model.counter);
-            orders.after_next_render(|_| Msg::Rendered).skip();
+        Msg::Rendered(info) => {
+            if info.timestamp - model.last_render_timestamp > model.input {
+                model.render += 1;
+                model.last_render_timestamp = info.timestamp;
+                draw(&model.canvas, model.render);
+            }
+            orders.after_next_render(Msg::Rendered);
         }
     }
 }
@@ -47,12 +48,12 @@ fn draw(canvas: &ElRef<HtmlCanvasElement>, counter: i32) {
     let canvas = canvas.get().expect("get canvas element");
     let ctx = seed::canvas_context_2d(&canvas);
 
+    let width = WIDTH as f64;
+    let height = HEIGHT as f64;
+
     // clear canvas
     ctx.begin_path();
-    ctx.clear_rect(0., 0., 400., 200.);
-
-    let width = 200.;
-    let height = 100.;
+    ctx.clear_rect(0., 0., width, height);
 
     ctx.rect(0., 0., width, height);
     ctx.set_fill_style(&JsValue::from_str(c));
@@ -65,21 +66,26 @@ fn draw(canvas: &ElRef<HtmlCanvasElement>, counter: i32) {
 
 fn view(model: &Model) -> Node<Msg> {
     div![
-        C!["counter"],
-        C!["render"],
-        button![model.render],
-        "This is a counter: ",
-        button![model.counter, ev(Ev::Click, |_| Msg::Increment),],
-        canvas![
+        p!["This was rendered ", model.render, " times"],
+        p!["last render timestamp: ", model.last_render_timestamp],
+        div![
+            "delay between updates",
+            input![attrs![At::Type => "Number", At::Value => model.input]],
+        ],
+        div![
+            "This is a counter: ",
+            button![model.counter, ev(Ev::Click, |_| Msg::Increment),],
+        ],
+        div![canvas![
             el_ref(&model.canvas),
             attrs![
-                At::Width => px(400),
-                At::Height => px(200),
+                At::Width => px(WIDTH),
+                At::Height => px(HEIGHT),
             ],
             style![
                 St::Border => "1px solid black",
             ],
-        ],
+        ],]
     ]
 }
 
