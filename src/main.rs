@@ -78,17 +78,21 @@ fn view(model: &Model) -> Node<Msg> {
                 input_ev(Ev::Input, Msg::InputTextChanged),
             ],
         ],
-        div![canvas![
-            el_ref(&model.canvas),
-            attrs![
-                At::Width => px(WIDTH),
-                At::Height => px(HEIGHT),
-            ],
-            style![
-                St::Border => "1px solid black",
-            ],
-        ],]
+        one_canvas(&model.canvas),
     ]
+}
+
+fn one_canvas(canvas: &ElRef<HtmlCanvasElement>) -> Node<Msg> {
+    div![canvas![
+        el_ref(&canvas),
+        attrs![
+            At::Width => px(WIDTH),
+            At::Height => px(HEIGHT),
+        ],
+        style![
+            St::Border => "1px solid black",
+        ],
+    ],]
 }
 
 fn main() {
