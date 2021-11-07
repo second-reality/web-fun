@@ -23,6 +23,7 @@ struct Model {
 enum Msg {
     Increment,
     Rendered(RenderInfo),
+    InputTextChanged(String),
 }
 
 fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
@@ -37,6 +38,9 @@ fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
                 draw(&model.canvas, model.render);
             }
             orders.after_next_render(Msg::Rendered);
+        }
+        Msg::InputTextChanged(val) => {
+            model.input = val.parse().unwrap_or(1000.);
         }
     }
 }
@@ -70,7 +74,11 @@ fn view(model: &Model) -> Node<Msg> {
         p!["last render timestamp: ", model.last_render_timestamp],
         div![
             "delay between updates",
-            input![attrs![At::Type => "Number", At::Value => model.input]],
+            input![
+                attrs![At::Type => "Number", At::Value => model.input],
+                input_ev(Ev::Input, Msg::InputTextChanged),
+            ],
+
         ],
         div![
             "This is a counter: ",
