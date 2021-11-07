@@ -4,9 +4,10 @@ use web_sys::HtmlCanvasElement;
 fn init(_: Url, orders: &mut impl Orders<Msg>) -> Model {
     orders.after_next_render(Msg::Rendered);
     orders.send_msg(Msg::AddCanvas);
-    let mut model = Model::default();
-    model.input = 50.;
-    model
+    Model {
+        input: 50.,
+        ..Default::default()
+    }
 }
 
 const WIDTH: i32 = 50;
@@ -34,7 +35,7 @@ fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
                 model.last_render_timestamp = info.timestamp;
 
                 for canvas in model.all_canvas.iter() {
-                    draw(&canvas, model.render);
+                    draw(canvas, model.render);
                 }
             }
             orders.after_next_render(Msg::Rendered);
@@ -93,13 +94,13 @@ fn view(model: &Model) -> Node<Msg> {
                 input_ev(Ev::Input, Msg::InputTextChanged),
             ],
         ],
-        model.all_canvas.iter().map(|c| one_canvas(&c))
+        model.all_canvas.iter().map(|c| one_canvas(c))
     ]
 }
 
 fn one_canvas(canvas: &ElRef<HtmlCanvasElement>) -> Node<Msg> {
     canvas![
-        el_ref(&canvas),
+        el_ref(canvas),
         attrs![
             At::Width => px(WIDTH),
             At::Height => px(HEIGHT),
