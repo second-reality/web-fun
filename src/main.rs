@@ -84,7 +84,7 @@ fn draw(canvas: &ElRef<HtmlCanvasElement>, id: i32) {
 fn view(model: &Model) -> Node<Msg> {
     div![
         p!["This was rendered ", model.render, " times"],
-        p!["last render timestamp: ", model.last_render_timestamp],
+        p!["last render timestamp (ms): ", model.last_render_timestamp as u64],
         p!["Numer of canvas: ", model.all_canvas.len()],
         button!["add 10 canvas", ev(Ev::Click, |_| Msg::AddCanvas)],
         div![
