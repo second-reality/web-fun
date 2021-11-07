@@ -3,8 +3,9 @@ use web_sys::HtmlCanvasElement;
 
 fn init(_: Url, orders: &mut impl Orders<Msg>) -> Model {
     orders.after_next_render(Msg::Rendered);
+    orders.send_msg(Msg::AddCanvas);
     let mut model = Model::default();
-    model.input = 500.;
+    model.input = 50.;
     model
 }
 
@@ -16,12 +17,13 @@ struct Model {
     render: i32,
     input: f64,
     last_render_timestamp: f64,
-    canvas: ElRef<HtmlCanvasElement>,
+    all_canvas: Vec<ElRef<HtmlCanvasElement>>,
 }
 
 enum Msg {
     Rendered(RenderInfo),
     InputTextChanged(String),
+    AddCanvas,
 }
 
 fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
@@ -30,7 +32,10 @@ fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
             if info.timestamp - model.last_render_timestamp > model.input {
                 model.render += 1;
                 model.last_render_timestamp = info.timestamp;
-                draw(&model.canvas, model.render);
+
+                for canvas in model.all_canvas.iter() {
+                    draw(&canvas, model.render);
+                }
             }
             orders.after_next_render(Msg::Rendered);
         }
@@ -41,13 +46,21 @@ fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
                 }
             }
         }
+        Msg::AddCanvas => {
+            for _ in 0..10 {
+                model.all_canvas.push(ElRef::<HtmlCanvasElement>::default());
+            }
+        }
     }
 }
 
 fn draw(canvas: &ElRef<HtmlCanvasElement>, id: i32) {
-    let colors = vec!["red", "blue", "green", "yellow"];
+    let colors: Vec<String> = (70..250)
+        .step_by(10)
+        .map(|i| format!("rgb({}, {}, {})", i, i, i))
+        .collect();
     let idx = (id as usize) % colors.len();
-    let c = colors[idx];
+    let c = &colors[idx];
     let canvas = canvas.get().expect("get canvas element");
     let ctx = seed::canvas_context_2d(&canvas);
 
@@ -71,6 +84,8 @@ fn view(model: &Model) -> Node<Msg> {
     div![
         p!["This was rendered ", model.render, " times"],
         p!["last render timestamp: ", model.last_render_timestamp],
+        p!["Numer of canvas: ", model.all_canvas.len()],
+        button!["add 10 canvas", ev(Ev::Click, |_| Msg::AddCanvas)],
         div![
             "delay between updates",
             input![
@@ -78,12 +93,12 @@ fn view(model: &Model) -> Node<Msg> {
                 input_ev(Ev::Input, Msg::InputTextChanged),
             ],
         ],
-        one_canvas(&model.canvas),
+        model.all_canvas.iter().map(|c| one_canvas(&c))
     ]
 }
 
 fn one_canvas(canvas: &ElRef<HtmlCanvasElement>) -> Node<Msg> {
-    div![canvas![
+    canvas![
         el_ref(&canvas),
         attrs![
             At::Width => px(WIDTH),
@@ -92,7 +107,7 @@ fn one_canvas(canvas: &ElRef<HtmlCanvasElement>) -> Node<Msg> {
         style![
             St::Border => "1px solid black",
         ],
-    ],]
+    ]
 }
 
 fn main() {
