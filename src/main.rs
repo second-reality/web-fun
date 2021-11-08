@@ -5,21 +5,22 @@ fn init(_: Url, orders: &mut impl Orders<Msg>) -> Model {
     orders.after_next_render(Msg::Rendered);
     orders.send_msg(Msg::AddCanvas);
     Model {
+        render: 0,
         input: 100.,
-        ..Default::default()
+        last_render_timestamp: 0.,
+        all_canvas: vec![],
     }
 }
 
-const WIDTH: i32 = 50;
-const HEIGHT: i32 = 50;
-
-#[derive(Default)]
 struct Model {
     render: i32,
     input: f64,
     last_render_timestamp: f64,
     all_canvas: Vec<ElRef<HtmlCanvasElement>>,
 }
+
+const WIDTH: i32 = 50;
+const HEIGHT: i32 = 50;
 
 enum Msg {
     Rendered(RenderInfo),
