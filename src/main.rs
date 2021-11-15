@@ -116,9 +116,6 @@ fn view(model: &Model) -> Node<Msg> {
             ")"
         ],
         hr!(),
-        div!["TODO: try using putImageData (see how faster it is, + use dedicated rust lib!)"],
-        hr!(),
-        hr!(),
         div![
             "TODO: read file using FileReader. Use Blob interface (duplicate content using a
             slice) to see if same file can be read several times."
