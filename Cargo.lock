@@ -466,6 +466,7 @@ name = "seed-playground"
 version = "0.1.0"
 dependencies = [
  "seed",
+ "web-sys",
 ]
 
 [[package]]

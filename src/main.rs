@@ -69,6 +69,10 @@ fn draw(canvas: &ElRef<HtmlCanvasElement>, id: i32) {
     let width = WIDTH as f64;
     let height = HEIGHT as f64;
 
+    let lol = vec![];
+
+    ctx.put_image_data(0, 0);
+
     // clear canvas
     ctx.begin_path();
     ctx.clear_rect(0., 0., width, height);
@@ -94,7 +98,7 @@ fn view(model: &Model) -> Node<Msg> {
         div![
             "delay between updates ",
             input![
-                attrs!{At::Type => "range", At::Min => 1, At::Max => 500, At::Value => model.input},
+                attrs! {At::Type => "range", At::Min => 1, At::Max => 500, At::Value => model.input},
                 input_ev(Ev::Input, Msg::InputTextChanged),
             ],
             "(",
@@ -106,8 +110,10 @@ fn view(model: &Model) -> Node<Msg> {
         div!["TODO: try using putImageData (see how faster it is, + use dedicated rust lib!)"],
         hr!(),
         hr!(),
-        div!["TODO: read file using FileReader. Use Blob interface (duplicate content using a
-            slice) to see if same file can be read several times."],
+        div![
+            "TODO: read file using FileReader. Use Blob interface (duplicate content using a
+            slice) to see if same file can be read several times."
+        ],
         hr!(),
         model.all_canvas.iter().map(|c| one_canvas(c))
     ]
@@ -116,7 +122,7 @@ fn view(model: &Model) -> Node<Msg> {
 fn one_canvas(canvas: &ElRef<HtmlCanvasElement>) -> Node<Msg> {
     canvas![
         el_ref(canvas),
-        attrs!{
+        attrs! {
             At::Width => px(WIDTH),
             At::Height => px(HEIGHT),
         },
