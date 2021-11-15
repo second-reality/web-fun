@@ -73,7 +73,7 @@ fn draw(canvas: &ElRef<HtmlCanvasElement>, id: i32) {
         lol.push(color);
         lol.push(color);
         lol.push(color);
-        lol.push(255);
+        lol.push(200);
     }
 
     let data = ImageData::new_with_u8_clamped_array_and_sh(Clamped(&lol), WIDTH as u32, HEIGHT as u32);
