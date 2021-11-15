@@ -59,18 +59,19 @@ fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
 }
 
 fn draw(canvas: &ElRef<HtmlCanvasElement>, id: i32) {
-    let colors: Vec<String> = (70..250)
-        .step_by(10)
-        .map(|i| format!("rgb({}, {}, {})", i, i, i))
-        .collect();
-    let idx = (id as usize) % colors.len();
-    let c = &colors[idx];
     let canvas = canvas.get().expect("get canvas element");
     let ctx = seed::canvas_context_2d(&canvas);
 
     let mut lol: Vec<u8> = vec![];
     // don't forget times 4 stupid!!!
-    lol.resize((WIDTH * HEIGHT * 4) as usize, 12);
+    for _ in 0..WIDTH * HEIGHT
+    {
+        let color = 255 - (id * 10 % 255) as u8;
+        lol.push(color);
+        lol.push(color);
+        lol.push(color);
+        lol.push(255);
+    }
 
     let data = ImageData::new_with_u8_clamped_array_and_sh(Clamped(&lol), WIDTH as u32, HEIGHT as u32);
     let data = data.unwrap();
