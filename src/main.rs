@@ -2,6 +2,7 @@ use seed::{prelude::*, *};
 use web_sys::HtmlCanvasElement;
 use web_sys::ImageData;
 use wasm_bindgen::Clamped;
+use rand::Rng;
 
 fn init(_: Url, orders: &mut impl Orders<Msg>) -> Model {
     orders.after_next_render(Msg::Rendered);
@@ -66,7 +67,9 @@ fn draw(canvas: &ElRef<HtmlCanvasElement>, id: i32) {
     // don't forget times 4 stupid!!!
     for _ in 0..WIDTH * HEIGHT
     {
-        let color = 255 - (id * 10 % 255) as u8;
+        let mut rng = rand::thread_rng();
+        //let color = 255 - (id * 10 % 255) as u8;
+        let color = rng.gen::<u8>();
         lol.push(color);
         lol.push(color);
         lol.push(color);
