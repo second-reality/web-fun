@@ -1,5 +1,7 @@
 use seed::{prelude::*, *};
 use web_sys::HtmlCanvasElement;
+use web_sys::ImageData;
+use wasm_bindgen::Clamped;
 
 fn init(_: Url, orders: &mut impl Orders<Msg>) -> Model {
     orders.after_next_render(Msg::Rendered);
@@ -66,24 +68,27 @@ fn draw(canvas: &ElRef<HtmlCanvasElement>, id: i32) {
     let canvas = canvas.get().expect("get canvas element");
     let ctx = seed::canvas_context_2d(&canvas);
 
-    let width = WIDTH as f64;
-    let height = HEIGHT as f64;
+    let mut lol: Vec<u8> = vec![];
+    // don't forget times 4 stupid!!!
+    lol.resize((WIDTH * HEIGHT * 4) as usize, 12);
 
-    let lol = vec![];
+    let data = ImageData::new_with_u8_clamped_array_and_sh(Clamped(&lol), WIDTH as u32, HEIGHT as u32);
+    let data = data.unwrap();
 
-    ctx.put_image_data(0, 0);
+    //let data = ctx.get_image_data(0., 0., WIDTH as f64, HEIGHT as f64).unwrap();
+    //data.data()[13] = 255;
+    ctx.put_image_data(&data, 0., 0.).unwrap();
 
-    // clear canvas
-    ctx.begin_path();
-    ctx.clear_rect(0., 0., width, height);
+    //// clear canvas
+    //ctx.begin_path();
+    //ctx.clear_rect(0., 0., width, height);
 
-    ctx.rect(0., 0., width, height);
-    ctx.set_fill_style(&JsValue::from_str(c));
-    ctx.fill();
+    //ctx.set_fill_style(&JsValue::from_str(c));
+    //ctx.fill();
 
-    ctx.move_to(0., 0.);
-    ctx.line_to(width, height);
-    ctx.stroke();
+    //ctx.move_to(0., 0.);
+    //ctx.line_to(width, height);
+    //ctx.stroke();
 }
 
 fn view(model: &Model) -> Node<Msg> {
