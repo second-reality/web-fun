@@ -1,8 +1,8 @@
+use rand::Rng;
 use seed::{prelude::*, *};
+use wasm_bindgen::Clamped;
 use web_sys::HtmlCanvasElement;
 use web_sys::ImageData;
-use wasm_bindgen::Clamped;
-use rand::Rng;
 
 fn init(_: Url, orders: &mut impl Orders<Msg>) -> Model {
     orders.after_next_render(Msg::Rendered);
@@ -10,6 +10,7 @@ fn init(_: Url, orders: &mut impl Orders<Msg>) -> Model {
     Model {
         render: 0,
         input: 100.,
+        generate_noise: true,
         last_render_timestamp: 0.,
         all_canvas: vec![],
     }
@@ -19,6 +20,7 @@ struct Model {
     render: i32,
     input: f64,
     last_render_timestamp: f64,
+    generate_noise: bool,
     all_canvas: Vec<ElRef<HtmlCanvasElement>>,
 }
 
@@ -28,6 +30,7 @@ const HEIGHT: i32 = 100;
 enum Msg {
     Rendered(RenderInfo),
     InputTextChanged(String),
+    GenerateNoiseToggle,
     AddCanvas,
 }
 
@@ -39,7 +42,7 @@ fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
                 model.last_render_timestamp = info.timestamp;
 
                 for (id, canvas) in model.all_canvas.iter().enumerate() {
-                    draw(canvas, id);
+                    draw(canvas, model.generate_noise, id);
                 }
             }
             orders.after_next_render(Msg::Rendered);
@@ -51,39 +54,48 @@ fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
                 }
             }
         }
+        Msg::GenerateNoiseToggle => {
+            model.generate_noise = !model.generate_noise;
+        }
         Msg::AddCanvas => {
             model.all_canvas.push(ElRef::<HtmlCanvasElement>::default());
         }
     }
 }
 
-fn draw(canvas: &ElRef<HtmlCanvasElement>, canvas_id: usize) {
+fn draw(canvas: &ElRef<HtmlCanvasElement>, generate_noise: bool, canvas_id: usize) {
     let canvas = canvas.get().expect("get canvas element");
     let ctx = seed::canvas_context_2d(&canvas);
 
+    if generate_noise {
+        let mut lol: Vec<u8> = vec![];
+        // don't forget times 4 stupid!!!
+        for _ in 0..WIDTH * HEIGHT {
+            let mut rng = rand::thread_rng();
+            //let color = 255 - (id * 10 % 255) as u8;
+            let color = rng.gen::<u8>();
+            lol.push(color);
+            lol.push(color);
+            lol.push(color);
+            lol.push(200);
+        }
 
-    let mut lol: Vec<u8> = vec![];
-    // don't forget times 4 stupid!!!
-    for _ in 0..WIDTH * HEIGHT
-    {
-        let mut rng = rand::thread_rng();
-        //let color = 255 - (id * 10 % 255) as u8;
-        let color = rng.gen::<u8>();
-        lol.push(color);
-        lol.push(color);
-        lol.push(color);
-        lol.push(200);
+        let data =
+            ImageData::new_with_u8_clamped_array_and_sh(Clamped(&lol), WIDTH as u32, HEIGHT as u32);
+        let data = data.unwrap();
+        ctx.put_image_data(&data, 0., 0.).unwrap();
+    } else {
+        ctx.clear_rect(0., 0., WIDTH as f64, HEIGHT as f64);
     }
-
-    ctx.clear_rect(0., 0., WIDTH as f64, HEIGHT as f64);
-
-    let data = ImageData::new_with_u8_clamped_array_and_sh(Clamped(&lol), WIDTH as u32, HEIGHT as u32);
-    let data = data.unwrap();
-    ctx.put_image_data(&data, 0., 0.).unwrap();
 
     ctx.set_fill_style(&JsValue::from_str("red"));
     ctx.set_font("30px Verdana");
-    ctx.fill_text(&canvas_id.to_string(), WIDTH as f64 / 2., HEIGHT as f64 / 2.).unwrap();
+    ctx.fill_text(
+        &canvas_id.to_string(),
+        WIDTH as f64 / 2.,
+        HEIGHT as f64 / 2.,
+    )
+    .unwrap();
 }
 
 fn view(model: &Model) -> Node<Msg> {
@@ -95,6 +107,11 @@ fn view(model: &Model) -> Node<Msg> {
         ],
         p!["Numer of canvas: ", model.all_canvas.len()],
         button!["add canvas", ev(Ev::Click, |_| Msg::AddCanvas)],
+        input![
+            attrs! {At::Type => "checkbox", At::Checked => model.generate_noise.as_at_value()},
+            ev(Ev::Click, |_| Msg::GenerateNoiseToggle),
+        ],
+        "Generate Noise",
         div![
             "delay between updates ",
             input![
