@@ -68,20 +68,22 @@ fn draw(canvas: &ElRef<HtmlCanvasElement>, generate_noise: bool, canvas_id: usiz
     let ctx = seed::canvas_context_2d(&canvas);
 
     if generate_noise {
-        let mut lol: Vec<u8> = vec![];
-        // don't forget times 4 stupid!!!
+        let mut noise: Vec<u8> = vec![];
         for _ in 0..WIDTH * HEIGHT {
             let mut rng = rand::thread_rng();
             //let color = 255 - (id * 10 % 255) as u8;
             let color = rng.gen::<u8>();
-            lol.push(color);
-            lol.push(color);
-            lol.push(color);
-            lol.push(200);
+            noise.push(color);
+            noise.push(color);
+            noise.push(color);
+            noise.push(200);
         }
 
-        let data =
-            ImageData::new_with_u8_clamped_array_and_sh(Clamped(&lol), WIDTH as u32, HEIGHT as u32);
+        let data = ImageData::new_with_u8_clamped_array_and_sh(
+            Clamped(&noise),
+            WIDTH as u32,
+            HEIGHT as u32,
+        );
         let data = data.unwrap();
         ctx.put_image_data(&data, 0., 0.).unwrap();
     } else {
