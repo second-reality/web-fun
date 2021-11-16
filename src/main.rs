@@ -89,7 +89,9 @@ fn draw(canvas: &ElRef<HtmlCanvasElement>, generate_noise: bool, canvas_id: usiz
     }
 
     ctx.set_fill_style(&JsValue::from_str("red"));
-    ctx.set_font("30px Verdana");
+    let font_size = 30;
+    ctx.set_font(&(font_size.to_string() + "px Verdana"));
+    ctx.set_text_align("center");
     ctx.fill_text(
         &canvas_id.to_string(),
         WIDTH as f64 / 2.,
