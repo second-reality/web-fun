@@ -10,7 +10,7 @@ fn init(_: Url, orders: &mut impl Orders<Msg>) -> Model {
     Model {
         render: 0,
         input: 50.,
-        generate_noise: true,
+        generate_noise: false,
         last_render_timestamp: 0.,
         all_canvas: vec![],
     }
