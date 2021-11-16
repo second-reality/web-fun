@@ -9,7 +9,7 @@ fn init(_: Url, orders: &mut impl Orders<Msg>) -> Model {
     orders.send_msg(Msg::AddCanvas);
     Model {
         render: 0,
-        input: 100.,
+        input: 50.,
         generate_noise: true,
         last_render_timestamp: 0.,
         all_canvas: vec![],
