@@ -29,7 +29,7 @@ const HEIGHT: i32 = 100;
 
 enum Msg {
     Rendered(RenderInfo),
-    InputTextChanged(String),
+    RenderDelayChanged(String),
     GenerateNoiseToggle,
     AddCanvas,
 }
@@ -47,7 +47,7 @@ fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
             }
             orders.after_next_render(Msg::Rendered);
         }
-        Msg::InputTextChanged(val) => {
+        Msg::RenderDelayChanged(val) => {
             if let Ok(v) = val.parse() {
                 if v > 0. {
                     model.input = v;
@@ -116,7 +116,7 @@ fn view(model: &Model) -> Node<Msg> {
             "delay between updates ",
             input![
                 attrs! {At::Type => "range", At::Min => 1, At::Max => 500, At::Value => model.input},
-                input_ev(Ev::Input, Msg::InputTextChanged),
+                input_ev(Ev::Input, Msg::RenderDelayChanged),
             ],
             "(",
             model.input,
@@ -129,11 +129,11 @@ fn view(model: &Model) -> Node<Msg> {
             slice) to see if same file can be read several times."
         ],
         hr!(),
-        model.all_canvas.iter().map(|c| one_canvas(c))
+        model.all_canvas.iter().map(|c| view_one_canvas(c))
     ]
 }
 
-fn one_canvas(canvas: &ElRef<HtmlCanvasElement>) -> Node<Msg> {
+fn view_one_canvas(canvas: &ElRef<HtmlCanvasElement>) -> Node<Msg> {
     canvas![
         el_ref(canvas),
         attrs! {
