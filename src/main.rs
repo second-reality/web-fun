@@ -52,9 +52,7 @@ fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
             }
         }
         Msg::AddCanvas => {
-            for _ in 0..5 {
-                model.all_canvas.push(ElRef::<HtmlCanvasElement>::default());
-            }
+            model.all_canvas.push(ElRef::<HtmlCanvasElement>::default());
         }
     }
 }
@@ -96,7 +94,7 @@ fn view(model: &Model) -> Node<Msg> {
             model.last_render_timestamp as u64
         ],
         p!["Numer of canvas: ", model.all_canvas.len()],
-        button!["add 5 canvas", ev(Ev::Click, |_| Msg::AddCanvas)],
+        button!["add canvas", ev(Ev::Click, |_| Msg::AddCanvas)],
         div![
             "delay between updates ",
             input![
