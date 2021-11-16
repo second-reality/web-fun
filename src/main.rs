@@ -92,6 +92,7 @@ fn draw(canvas: &ElRef<HtmlCanvasElement>, generate_noise: bool, canvas_id: usiz
     let font_size = 30;
     ctx.set_font(&(font_size.to_string() + "px Verdana"));
     ctx.set_text_align("center");
+    ctx.set_text_baseline("middle");
     ctx.fill_text(
         &canvas_id.to_string(),
         WIDTH as f64 / 2.,
