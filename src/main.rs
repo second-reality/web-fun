@@ -134,6 +134,8 @@ fn view(model: &Model) -> Node<Msg> {
             slice) to see if same file can be read several times."
         ],
         hr!(),
+        div!["TODO: test async to fetch data from the web."],
+        hr!(),
         model.all_canvas.iter().map(|c| view_one_canvas(c))
     ]
 }
