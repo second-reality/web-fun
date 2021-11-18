@@ -66,8 +66,8 @@ fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
         Msg::AddCanvas => {
             model.all_canvas.push(ElRef::<HtmlCanvasElement>::default());
         }
-        Msg::FileUploaded(Some(inputFile)) => {
-            model.input_file = Some(inputFile);
+        Msg::FileUploaded(Some(input_file)) => {
+            model.input_file = Some(input_file);
         }
         Msg::FileRead(text) => {
             log!(text)
@@ -78,7 +78,7 @@ fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
         Msg::ShowFileContent => {
             if let Some(f) = &model.input_file {
                 log!(f.name());
-                let b: &Blob = &f;
+                let b: &Blob = f;
                 log!(b.size());
                 let slice = b.slice_with_i32_and_i32(0, 12).unwrap();
 
