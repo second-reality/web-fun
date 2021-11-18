@@ -80,7 +80,7 @@ fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
                 log!(f.name());
                 let b: &Blob = f;
                 log!(b.size());
-                let slice = b.slice_with_i32_and_i32(0, 12).unwrap();
+                let slice = b.slice_with_i32_and_i32(0, 120).unwrap();
 
                 orders.perform_cmd(async move {
                     let text = JsFuture::from(slice.text())
