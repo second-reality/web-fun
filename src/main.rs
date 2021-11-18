@@ -1,9 +1,9 @@
 use rand::Rng;
 use seed::{prelude::*, *};
 use wasm_bindgen::Clamped;
-use web_sys::{Blob, File};
 use web_sys::HtmlCanvasElement;
 use web_sys::ImageData;
+use web_sys::{Blob, File};
 
 fn init(_: Url, orders: &mut impl Orders<Msg>) -> Model {
     orders.after_next_render(Msg::Rendered);
@@ -14,6 +14,7 @@ fn init(_: Url, orders: &mut impl Orders<Msg>) -> Model {
         generate_noise: false,
         last_render_timestamp: 0.,
         all_canvas: vec![],
+        input_file: None,
     }
 }
 
@@ -23,7 +24,7 @@ struct Model {
     last_render_timestamp: f64,
     generate_noise: bool,
     all_canvas: Vec<ElRef<HtmlCanvasElement>>,
-    inputFile: Blob,
+    input_file: Option<File>,
 }
 
 const WIDTH: i32 = 100;
@@ -36,6 +37,7 @@ enum Msg {
     AddCanvas,
     FileUploaded(Option<File>),
     FileRead(String),
+    ShowFileContent,
 }
 
 fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
@@ -65,38 +67,30 @@ fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
             model.all_canvas.push(ElRef::<HtmlCanvasElement>::default());
         }
         Msg::FileUploaded(Some(inputFile)) => {
-            log!(inputFile.name());
-            let b: &Blob = &inputFile;
-            log!(b.size());
-            let slice = b.slice_with_i32_and_i32(0, 12).unwrap();
-
-            orders.perform_cmd(async move {
-                let text =
-                    JsFuture::from(slice.text())
-                    .await
-                    .expect("read file")
-                    .as_string()
-                    .expect("cast file text to String");
-                Msg::FileRead(text)
-            });
-
-            let slice = b.slice_with_i32_and_i32(0, 24).unwrap();
-
-            orders.perform_cmd(async move {
-                let text =
-                    JsFuture::from(slice.text())
-                    .await
-                    .expect("read file")
-                    .as_string()
-                    .expect("cast file text to String");
-                Msg::FileRead(text)
-            });
+            model.input_file = Some(inputFile);
         }
         Msg::FileRead(text) => {
             log!(text)
         }
         Msg::FileUploaded(None) => {
             log!("none file");
+        }
+        Msg::ShowFileContent => {
+            if let Some(f) = &model.input_file {
+                log!(f.name());
+                let b: &Blob = &f;
+                log!(b.size());
+                let slice = b.slice_with_i32_and_i32(0, 12).unwrap();
+
+                orders.perform_cmd(async move {
+                    let text = JsFuture::from(slice.text())
+                        .await
+                        .expect("read file")
+                        .as_string()
+                        .expect("cast file text to String");
+                    Msg::FileRead(text)
+                });
+            }
         }
     }
 }
@@ -155,8 +149,10 @@ fn view(model: &Model) -> Node<Msg> {
             ev(Ev::Click, |_| Msg::GenerateNoiseToggle),
         ],
         "Generate Noise",
-        input![
-            attrs! {At::Type => "file"},
+        div![
+            button!["show file content", ev(Ev::Click, |_| Msg::ShowFileContent)],
+            input![
+                attrs! {At::Type => "file"},
                 ev(Ev::Change, |event| {
                     let file = event
                         .target()
@@ -166,6 +162,7 @@ fn view(model: &Model) -> Node<Msg> {
 
                     Msg::FileUploaded(file)
                 }),
+            ],
         ],
         div![
             "delay between updates ",
