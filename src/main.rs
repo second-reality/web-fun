@@ -75,6 +75,22 @@ fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
         Msg::FileUploaded(None) => {
             log!("none file");
         }
+
+        // Return response body as `Vec<u8>`.
+        //
+        // # Errors
+        // Returns `FetchError::PromiseError`.
+        //pub async fn bytes(&self) -> Result<Vec<u8>> {
+        //    Ok(self
+        //        .raw_response
+        //        .array_buffer()
+        //        .map_err(FetchError::PromiseError)
+        //        .map(JsFuture::from)?
+        //        .await
+        //        .map_err(FetchError::PromiseError)
+        //        .map(|array_buffer| js_sys::Uint8Array::new(&array_buffer))?
+        //        .to_vec())
+        //}
         Msg::ShowFileContent => {
             if let Some(f) = &model.input_file {
                 log!(f.name());
