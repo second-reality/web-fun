@@ -1,6 +1,7 @@
 use rand::Rng;
 use seed::{prelude::*, *};
 use wasm_bindgen::Clamped;
+use web_sys::{Blob, File};
 use web_sys::HtmlCanvasElement;
 use web_sys::ImageData;
 
@@ -22,6 +23,7 @@ struct Model {
     last_render_timestamp: f64,
     generate_noise: bool,
     all_canvas: Vec<ElRef<HtmlCanvasElement>>,
+    inputFile: Blob,
 }
 
 const WIDTH: i32 = 100;
@@ -32,6 +34,8 @@ enum Msg {
     RenderDelayChanged(String),
     GenerateNoiseToggle,
     AddCanvas,
+    FileUploaded(Option<File>),
+    FileRead(String),
 }
 
 fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
@@ -59,6 +63,40 @@ fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
         }
         Msg::AddCanvas => {
             model.all_canvas.push(ElRef::<HtmlCanvasElement>::default());
+        }
+        Msg::FileUploaded(Some(inputFile)) => {
+            log!(inputFile.name());
+            let b: &Blob = &inputFile;
+            log!(b.size());
+            let slice = b.slice_with_i32_and_i32(0, 12).unwrap();
+
+            orders.perform_cmd(async move {
+                let text =
+                    JsFuture::from(slice.text())
+                    .await
+                    .expect("read file")
+                    .as_string()
+                    .expect("cast file text to String");
+                Msg::FileRead(text)
+            });
+
+            let slice = b.slice_with_i32_and_i32(0, 24).unwrap();
+
+            orders.perform_cmd(async move {
+                let text =
+                    JsFuture::from(slice.text())
+                    .await
+                    .expect("read file")
+                    .as_string()
+                    .expect("cast file text to String");
+                Msg::FileRead(text)
+            });
+        }
+        Msg::FileRead(text) => {
+            log!(text)
+        }
+        Msg::FileUploaded(None) => {
+            log!("none file");
         }
     }
 }
@@ -117,6 +155,18 @@ fn view(model: &Model) -> Node<Msg> {
             ev(Ev::Click, |_| Msg::GenerateNoiseToggle),
         ],
         "Generate Noise",
+        input![
+            attrs! {At::Type => "file"},
+                ev(Ev::Change, |event| {
+                    let file = event
+                        .target()
+                        .and_then(|target| target.dyn_into::<web_sys::HtmlInputElement>().ok())
+                        .and_then(|file_input| file_input.files())
+                        .and_then(|file_list| file_list.get(0));
+
+                    Msg::FileUploaded(file)
+                }),
+        ],
         div![
             "delay between updates ",
             input![
