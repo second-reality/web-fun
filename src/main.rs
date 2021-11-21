@@ -15,6 +15,8 @@ fn init(_: Url, orders: &mut impl Orders<Msg>) -> Model {
         last_render_timestamp: 0.,
         all_canvas: vec![],
         input_file: None,
+        file_content: String::new(),
+        file_offset: 0,
     }
 }
 
@@ -25,6 +27,8 @@ struct Model {
     generate_noise: bool,
     all_canvas: Vec<ElRef<HtmlCanvasElement>>,
     input_file: Option<File>,
+    file_content: String,
+    file_offset: i32,
 }
 
 const WIDTH: i32 = 100;
@@ -37,7 +41,7 @@ enum Msg {
     AddCanvas,
     FileUploaded(Option<File>),
     FileRead(String),
-    ShowFileContent,
+    ShowMoreFileContent,
 }
 
 fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
@@ -68,9 +72,11 @@ fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
         }
         Msg::FileUploaded(Some(input_file)) => {
             model.input_file = Some(input_file);
+            model.file_offset = 0;
+            orders.after_next_render(|_| Msg::ShowMoreFileContent);
         }
         Msg::FileRead(text) => {
-            log!(text)
+            model.file_content = text;
         }
         Msg::FileUploaded(None) => {
             log!("none file");
@@ -91,12 +97,15 @@ fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
         //        .map(|array_buffer| js_sys::Uint8Array::new(&array_buffer))?
         //        .to_vec())
         //}
-        Msg::ShowFileContent => {
+        Msg::ShowMoreFileContent => {
             if let Some(f) = &model.input_file {
                 log!(f.name());
                 let b: &Blob = f;
                 log!(b.size());
-                let slice = b.slice_with_i32_and_i32(0, 120).unwrap();
+                let slice = b
+                    .slice_with_i32_and_i32(model.file_offset, model.file_offset + 120)
+                    .unwrap();
+                model.file_offset += 128;
 
                 orders.perform_cmd(async move {
                     let text = JsFuture::from(slice.text())
@@ -166,7 +175,10 @@ fn view(model: &Model) -> Node<Msg> {
         ],
         "Generate Noise",
         div![
-            button!["show file content", ev(Ev::Click, |_| Msg::ShowFileContent)],
+            button![
+                "show more file content",
+                ev(Ev::Click, |_| Msg::ShowMoreFileContent)
+            ],
             input![
                 attrs! {At::Type => "file"},
                 ev(Ev::Change, |event| {
@@ -199,7 +211,8 @@ fn view(model: &Model) -> Node<Msg> {
         hr!(),
         div!["TODO: test async to fetch data from the web."],
         hr!(),
-        model.all_canvas.iter().map(|c| view_one_canvas(c))
+        model.all_canvas.iter().map(|c| view_one_canvas(c)),
+        IF!(!model.file_content.is_empty() => view_file_content(&model.file_content))
     ]
 }
 
@@ -214,6 +227,10 @@ fn view_one_canvas(canvas: &ElRef<HtmlCanvasElement>) -> Node<Msg> {
             St::Border => "1px solid black",
         ],
     ]
+}
+
+fn view_file_content(content: &String) -> Node<Msg> {
+    p!["file content is: ", content]
 }
 
 fn main() {
